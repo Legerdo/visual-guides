@@ -1,0 +1,42 @@
+{
+  "slug": "2026-09-ai-evaluation-gap",
+  "title": "왜 AI 평가는 이렇게 갈리나?",
+  "category": "ai",
+  "created": "2026-09-28",
+  "language": "ko",
+  "status": "published-ready",
+  "assets": [
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/01-why-ai-evaluations-diverge.png",
+      "sha256": "dcfdbce24f2f939202a185fcbb5ddb2f53102756ab3a726334fd287930910e1c",
+      "bytes": 1695959,
+      "width": 1055,
+      "height": 1491,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/02-why-ai-feels-different.png",
+      "sha256": "0aadd31c562e9b9cae59f75ac9315365af138fb17012a6dd79eead7ead8045ff",
+      "bytes": 1575642,
+      "width": 1055,
+      "height": 1491,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/03-ai-debate-2024-2026.png",
+      "sha256": "6f75fa2d7141221e44fea23d70a0480b4de92b79a800f11b35acf9821b43e58f",
+      "bytes": 1723087,
+      "width": 1055,
+      "height": 1491,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/04-ai-debate-checklist.png",
+      "sha256": "262e1461a6375c04961bf77b0c846a7c9632624bd197f0e3e9752567f0f92939",
+      "bytes": 1761129,
+      "width": 1055,
+      "height": 1491,
+      "mime": "image/png"
+    }
+  ]
+}
