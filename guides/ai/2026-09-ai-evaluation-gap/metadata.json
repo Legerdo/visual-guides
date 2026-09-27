@@ -5,6 +5,36 @@
   "created": "2026-09-28",
   "language": "ko",
   "status": "published-ready",
+  "summary": "같은 AI를 두고도 평가가 갈리는 이유를 사용자 기준선, 과제 특성, 검수 비용, 신뢰성, 기대치 상승으로 나눠 설명하는 4장짜리 가이드.",
+  "tags": [
+    "ai",
+    "evaluation",
+    "productivity",
+    "trust",
+    "jagged-frontier"
+  ],
+  "pages": [
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/01-why-ai-evaluations-diverge.png",
+      "title": "왜 AI 평가는 이렇게 갈리나?",
+      "description": "사람마다 다른 기준선, 과제별 오류 비용, Jagged Frontier, 기대치 상승이라는 네 축으로 전체 구조를 잡는다."
+    },
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/02-why-ai-feels-different.png",
+      "title": "같은 AI, 왜 체감이 다를까?",
+      "description": "초보와 숙련자의 기준선 차이와 검수·수정·오류 비용을 포함한 실질 효용 관점으로 체감 차이를 설명한다."
+    },
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/03-ai-debate-2024-2026.png",
+      "title": "2024 → 2026, 논쟁은 어떻게 바뀌었나?",
+      "description": "논쟁의 중심이 ‘쓸 만한가?’에서 ‘어디까지 믿고 맡길 수 있나?’로 이동한 흐름을 시간축으로 정리한다."
+    },
+    {
+      "path": "guides/ai/2026-09-ai-evaluation-gap/images/04-ai-debate-checklist.png",
+      "title": "AI 논쟁을 볼 때 체크할 것",
+      "description": "작업 종류, 사용자 숙련도, 기대하는 자율성, 실제 측정 여부를 먼저 확인하도록 실전 체크리스트로 마무리한다."
+    }
+  ],
   "assets": [
     {
       "path": "guides/ai/2026-09-ai-evaluation-gap/images/01-why-ai-evaluations-diverge.png",

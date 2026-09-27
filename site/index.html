@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="주제별 이미지 가이드를 편하게 탐색하고 확대해서 보는 Visual Guides 뷰어">
+  <title>Visual Guides</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Visual Guides 홈">
+      <span class="brand-mark" aria-hidden="true">VG</span>
+      <span>
+        <strong>Visual Guides</strong>
+        <small>Topic-organized visual archive</small>
+      </span>
+    </a>
+    <nav class="top-actions" aria-label="외부 링크">
+      <a class="button ghost" href="https://github.com/Legerdo/visual-guides" target="_blank" rel="noreferrer">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="library-view" class="view">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">PUBLIC VISUAL ARCHIVE</p>
+          <h1>이미지 가이드를<br>읽기 편하게 한곳에서</h1>
+          <p class="hero-copy">AI, 개발, 게임, 리서치 주제를 카드로 찾고 각 페이지를 확대·탐색할 수 있다.</p>
+        </div>
+        <div class="hero-stats" aria-live="polite">
+          <div><strong id="guide-count">0</strong><span>가이드</span></div>
+          <div><strong id="page-count">0</strong><span>페이지</span></div>
+          <div><strong id="category-count">0</strong><span>카테고리</span></div>
+        </div>
+      </div>
+
+      <div class="library-toolbar" role="search">
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input id="search-input" type="search" placeholder="제목, 설명, 태그 검색" autocomplete="off">
+        </label>
+        <label class="select-wrap">
+          <span class="sr-only">카테고리</span>
+          <select id="category-filter">
+            <option value="all">전체 카테고리</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="guide-grid" class="guide-grid" aria-live="polite"></div>
+      <div id="empty-state" class="empty-state hidden">
+        <strong>검색 결과 없음</strong>
+        <p>다른 검색어나 카테고리를 선택해봐.</p>
+      </div>
+    </section>
+
+    <section id="guide-view" class="view hidden" aria-live="polite">
+      <button id="back-button" class="back-button" type="button">← 가이드 목록</button>
+
+      <header class="guide-header">
+        <div>
+          <div class="guide-meta-row">
+            <span id="guide-category" class="chip"></span>
+            <time id="guide-date"></time>
+          </div>
+          <h1 id="guide-title"></h1>
+          <p id="guide-summary"></p>
+        </div>
+        <div class="guide-links">
+          <a id="source-link" class="button ghost" target="_blank" rel="noreferrer">소스 보기</a>
+          <a id="sources-link" class="button ghost hidden" target="_blank" rel="noreferrer">근거 자료</a>
+        </div>
+      </header>
+
+      <div class="viewer-layout">
+        <aside class="thumbnail-rail" aria-label="페이지 목록">
+          <div id="thumbnail-list" class="thumbnail-list"></div>
+        </aside>
+
+        <section id="viewer-card" class="viewer-card">
+          <div class="viewer-toolbar">
+            <div class="page-navigation">
+              <button id="prev-button" class="icon-button" type="button" aria-label="이전 페이지">←</button>
+              <span id="page-indicator">1 / 1</span>
+              <button id="next-button" class="icon-button" type="button" aria-label="다음 페이지">→</button>
+            </div>
+            <div class="zoom-controls">
+              <button id="zoom-out-button" class="icon-button" type="button" aria-label="축소">−</button>
+              <button id="fit-button" class="toolbar-text-button" type="button">맞춤</button>
+              <button id="zoom-in-button" class="icon-button" type="button" aria-label="확대">＋</button>
+              <button id="fullscreen-button" class="toolbar-text-button" type="button">전체화면</button>
+              <a id="original-link" class="toolbar-text-button" target="_blank" rel="noreferrer">원본</a>
+            </div>
+          </div>
+
+          <div id="image-scroller" class="image-scroller" tabindex="0">
+            <img id="viewer-image" alt="">
+          </div>
+
+          <div class="page-caption">
+            <div>
+              <span id="page-kicker" class="page-kicker"></span>
+              <h2 id="page-title"></h2>
+              <p id="page-description"></p>
+            </div>
+            <span id="zoom-label" class="zoom-label">맞춤</span>
+          </div>
+        </section>
+      </div>
+
+      <p class="shortcut-hint">키보드: ← → 페이지 이동 · + − 확대/축소 · 0 맞춤 · F 전체화면 · Esc 목록</p>
+    </section>
+
+    <div id="load-error" class="error-panel hidden" role="alert">
+      <strong>가이드 목록을 불러오지 못했다.</strong>
+      <p>잠시 후 새로고침하거나 GitHub 저장소에서 직접 확인해봐.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <span>Visual Guides</span>
+    <span>GitHub Pages · static viewer</span>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

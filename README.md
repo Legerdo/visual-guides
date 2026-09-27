@@ -2,6 +2,18 @@
 
 A public, topic-organized archive for visual guides, explainers, infographics, and reference images.
 
+## Viewer
+
+**https://legerdo.github.io/visual-guides/**
+
+The GitHub Pages viewer provides:
+
+- topic/category cards and search
+- page thumbnails and previous/next navigation
+- image zoom, fit-to-view, fullscreen, and original-file access
+- keyboard navigation and mobile swipe
+- automatic catalog generation from each topic's `metadata.json`
+
 ## Structure
 
 ```text
@@ -14,6 +26,8 @@ guides/<category>/<YYYY-MM-topic-slug>/
    ├─ 02-*.png
    └─ ...
 ```
+
+The viewer source lives in `site/`. `scripts/build_site.py` validates guide metadata, builds `catalog.json`, copies the public guide files into `_site/`, and the Pages workflow deploys that artifact.
 
 ## Categories
 
@@ -32,3 +46,5 @@ guides/<category>/<YYYY-MM-topic-slug>/
 ## Maintenance rule
 
 When adding images, reuse an existing topic folder if the subject clearly matches. Otherwise create a new `YYYY-MM-topic-slug` folder. Use ordered, descriptive ASCII filenames and update the topic README, metadata, sources when applicable, and this catalog in the same commit.
+
+Do not hand-edit a deployed `catalog.json`; it is generated from topic metadata during the Pages build.

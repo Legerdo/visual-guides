@@ -14,3 +14,7 @@ When adding new images:
 8. Never publish secrets, private screenshots, personal identifiers, access tokens, or private-project material without explicit instruction.
 9. Prefer one coherent commit per upload/update request.
 10. If replacing an existing image, preserve its stable path unless there is a strong reason to version it separately.
+11. The GitHub Pages viewer is generated from topic `metadata.json`; keep `summary`, `tags`, and page-level title/description metadata useful for browsing.
+12. Do not manually create or commit a generated `catalog.json` or `_site/` output.
+13. When viewer code, guide metadata, or asset paths change, run `python scripts/build_site.py` and validate the generated catalog before committing.
+14. Keep the viewer dependency-free unless a concrete requirement justifies adding a build framework or package manager.
