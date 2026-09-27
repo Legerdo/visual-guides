@@ -4,21 +4,24 @@
   const els = {
     libraryView: document.getElementById("library-view"),
     guideView: document.getElementById("guide-view"),
-    guideGrid: document.getElementById("guide-grid"),
+    guideList: document.getElementById("guide-list"),
     emptyState: document.getElementById("empty-state"),
     loadError: document.getElementById("load-error"),
     searchInput: document.getElementById("search-input"),
-    categoryFilter: document.getElementById("category-filter"),
+    categoryTabsDynamic: document.getElementById("category-tabs-dynamic"),
+    categoryTabs: document.querySelector(".category-tabs"),
     guideCount: document.getElementById("guide-count"),
     pageCount: document.getElementById("page-count"),
-    categoryCount: document.getElementById("category-count"),
+    resultCount: document.getElementById("result-count"),
     backButton: document.getElementById("back-button"),
     guideCategory: document.getElementById("guide-category"),
     guideDate: document.getElementById("guide-date"),
+    guidePageCount: document.getElementById("guide-page-count"),
     guideTitle: document.getElementById("guide-title"),
     guideSummary: document.getElementById("guide-summary"),
     sourceLink: document.getElementById("source-link"),
     sourcesLink: document.getElementById("sources-link"),
+    pageNavCount: document.getElementById("page-nav-count"),
     thumbnailList: document.getElementById("thumbnail-list"),
     viewerCard: document.getElementById("viewer-card"),
     imageScroller: document.getElementById("image-scroller"),
@@ -50,10 +53,10 @@
 
   const categoryLabels = {
     ai: "AI",
-    development: "Development",
-    games: "Games",
-    research: "Research",
-    other: "Other"
+    development: "개발",
+    games: "게임",
+    research: "리서치",
+    other: "기타"
   };
 
   function escapeHtml(value) {
@@ -84,6 +87,7 @@
     const pageText = (guide.assets || []).map(function (asset) {
       return [asset.title, asset.description].filter(Boolean).join(" ");
     }).join(" ");
+
     return [
       guide.title,
       guide.summary,
@@ -97,15 +101,17 @@
     try {
       const response = await fetch("./catalog.json", { cache: "no-store" });
       if (!response.ok) throw new Error("catalog HTTP " + response.status);
+
       const payload = await response.json();
       state.catalog = Array.isArray(payload.guides) ? payload.guides : [];
       renderStats();
-      renderCategoryOptions();
+      renderCategoryTabs();
       renderLibrary();
       routeFromHash();
     } catch (error) {
       console.error(error);
       els.libraryView.classList.add("hidden");
+      els.guideView.classList.add("hidden");
       els.loadError.classList.remove("hidden");
     }
   }
@@ -114,26 +120,39 @@
     const totalPages = state.catalog.reduce(function (sum, guide) {
       return sum + (guide.assets ? guide.assets.length : 0);
     }, 0);
-    const categories = new Set(state.catalog.map(function (guide) {
-      return guide.category;
-    }).filter(Boolean));
 
     els.guideCount.textContent = String(state.catalog.length);
     els.pageCount.textContent = String(totalPages);
-    els.categoryCount.textContent = String(categories.size);
   }
 
-  function renderCategoryOptions() {
+  function renderCategoryTabs() {
     const categories = Array.from(new Set(state.catalog.map(function (guide) {
       return guide.category;
     }).filter(Boolean))).sort();
 
-    categories.forEach(function (category) {
-      const option = document.createElement("option");
-      option.value = category;
-      option.textContent = categoryLabel(category);
-      els.categoryFilter.appendChild(option);
+    els.categoryTabsDynamic.innerHTML = categories.map(function (category) {
+      return [
+        '<button class="category-tab" type="button" data-category="' + escapeHtml(category) + '" role="tab" aria-selected="false">',
+        escapeHtml(categoryLabel(category)),
+        "</button>"
+      ].join("");
+    }).join("");
+
+    els.categoryTabs.querySelectorAll(".category-tab").forEach(function (button) {
+      button.addEventListener("click", function () {
+        setCategory(button.getAttribute("data-category") || "all");
+      });
     });
+  }
+
+  function setCategory(category) {
+    state.category = category;
+    els.categoryTabs.querySelectorAll(".category-tab").forEach(function (button) {
+      const selected = button.getAttribute("data-category") === category;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+    });
+    renderLibrary();
   }
 
   function filteredGuides() {
@@ -147,41 +166,40 @@
 
   function renderLibrary() {
     const guides = filteredGuides();
-    els.guideGrid.innerHTML = guides.map(function (guide) {
+    els.resultCount.textContent = String(guides.length);
+    els.guideList.innerHTML = guides.map(function (guide) {
       const cover = guide.cover || (guide.assets && guide.assets[0] && guide.assets[0].path) || "";
+      const tags = (guide.tags || []).slice(0, 4);
+
       return [
-        '<article class="guide-card" tabindex="0" role="button" data-guide="' + escapeHtml(guide.slug) + '" aria-label="' + escapeHtml(guide.title) + ' 열기">',
-        '  <div class="guide-card-cover">',
+        '<button class="guide-row" type="button" data-guide="' + escapeHtml(guide.slug) + '">',
+        '  <span class="guide-row__cover">',
         '    <img src="' + escapeHtml(cover) + '" alt="" loading="lazy">',
-        '  </div>',
-        '  <div class="guide-card-body">',
-        '    <div class="guide-card-meta">',
-        '      <span class="chip">' + escapeHtml(categoryLabel(guide.category)) + '</span>',
-        '      <time>' + escapeHtml(formatDate(guide.created)) + '</time>',
-        '    </div>',
-        '    <h2>' + escapeHtml(guide.title) + '</h2>',
-        '    <p>' + escapeHtml(guide.summary || "") + '</p>',
-        '    <div class="guide-card-footer">',
-        '      <span><strong>' + escapeHtml(String((guide.assets || []).length)) + '</strong> pages</span>',
-        '      <span>보기 →</span>',
-        '    </div>',
-        '  </div>',
-        '</article>'
+        "  </span>",
+        '  <span class="guide-row__content">',
+        '    <span class="guide-row__eyebrow">',
+        '      <span class="badge">' + escapeHtml(categoryLabel(guide.category)) + "</span>",
+        "      <time>" + escapeHtml(formatDate(guide.created)) + "</time>",
+        "    </span>",
+        "    <h3>" + escapeHtml(guide.title) + "</h3>",
+        '    <span class="guide-row__summary">' + escapeHtml(guide.summary || "") + "</span>",
+        '    <span class="guide-row__tags">' + tags.map(function (tag) {
+          return '<span class="guide-row__tag">#' + escapeHtml(tag) + "</span>";
+        }).join("") + "</span>",
+        "  </span>",
+        '  <span class="guide-row__suffix">',
+        '    <span class="guide-row__pages">' + escapeHtml(String((guide.assets || []).length)) + " pages</span>",
+        '    <span class="guide-row__arrow" aria-hidden="true">→</span>',
+        "  </span>",
+        "</button>"
       ].join("\n");
     }).join("\n");
 
     els.emptyState.classList.toggle("hidden", guides.length !== 0);
 
-    els.guideGrid.querySelectorAll(".guide-card").forEach(function (card) {
-      function open() {
-        openGuide(card.getAttribute("data-guide"), 0, true);
-      }
-      card.addEventListener("click", open);
-      card.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          open();
-        }
+    els.guideList.querySelectorAll(".guide-row").forEach(function (row) {
+      row.addEventListener("click", function () {
+        openGuide(row.getAttribute("data-guide"), 0, true);
       });
     });
   }
@@ -210,6 +228,8 @@
     els.guideCategory.textContent = categoryLabel(guide.category);
     els.guideDate.textContent = formatDate(guide.created);
     els.guideDate.setAttribute("datetime", guide.created || "");
+    els.guidePageCount.textContent = guide.assets.length + " pages";
+    els.pageNavCount.textContent = String(guide.assets.length);
     els.guideTitle.textContent = guide.title;
     els.guideSummary.textContent = guide.summary || "";
     els.sourceLink.href = guide.source_url || "https://github.com/Legerdo/visual-guides";
@@ -230,12 +250,16 @@
 
   function renderThumbnails() {
     if (!state.currentGuide) return;
+
     els.thumbnailList.innerHTML = state.currentGuide.assets.map(function (asset, index) {
       return [
-        '<button class="thumbnail-button' + (index === state.pageIndex ? " active" : "") + '" type="button" data-page="' + index + '" aria-label="' + escapeHtml("페이지 " + (index + 1) + ": " + (asset.title || "")) + '">',
+        '<button class="thumbnail-button' + (index === state.pageIndex ? " is-selected" : "") + '" type="button" data-page="' + index + '" aria-label="' + escapeHtml("페이지 " + (index + 1) + ": " + (asset.title || "")) + '">',
         '  <img src="' + escapeHtml(asset.path) + '" alt="" loading="lazy">',
-        '  <span>' + String(index + 1).padStart(2, "0") + '</span>',
-        '</button>'
+        '  <span class="thumbnail-button__meta">',
+        '    <span class="thumbnail-button__number">' + String(index + 1).padStart(2, "0") + "</span>",
+        '    <span class="thumbnail-button__title">' + escapeHtml(asset.title || "Page " + (index + 1)) + "</span>",
+        "  </span>",
+        "</button>"
       ].join("\n");
     }).join("\n");
 
@@ -266,13 +290,17 @@
     els.nextButton.disabled = state.pageIndex === state.currentGuide.assets.length - 1;
 
     els.thumbnailList.querySelectorAll(".thumbnail-button").forEach(function (button, index) {
-      button.classList.toggle("active", index === state.pageIndex);
-      button.setAttribute("aria-current", index === state.pageIndex ? "page" : "false");
+      const selected = index === state.pageIndex;
+      button.classList.toggle("is-selected", selected);
+      if (selected) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
     });
 
     if (scrollThumbnail) {
-      const active = els.thumbnailList.querySelector(".thumbnail-button.active");
-      if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      const active = els.thumbnailList.querySelector(".thumbnail-button.is-selected");
+      if (active) {
+        active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      }
     }
 
     state.zoom = 1;
@@ -284,6 +312,7 @@
     if (!state.currentGuide) return;
     const clamped = Math.max(0, Math.min(index, state.currentGuide.assets.length - 1));
     if (clamped === state.pageIndex) return;
+
     state.pageIndex = clamped;
     renderPage(true);
     if (updateHash) updateHashForCurrentPage();
@@ -306,6 +335,7 @@
     state.zoom = 1;
     els.guideView.classList.add("hidden");
     els.libraryView.classList.remove("hidden");
+
     if (updateHash && window.location.hash) {
       history.pushState(null, "", window.location.pathname + window.location.search);
     }
@@ -324,13 +354,14 @@
       showLibrary(false);
       return;
     }
+
     const page = Math.max(0, (Number(params.get("page")) || 1) - 1);
     openGuide(slug, page, false);
   }
 
   function fitBaseWidth() {
     if (!els.viewerImage.naturalWidth) return 0;
-    const available = Math.max(240, els.imageScroller.clientWidth - 52);
+    const available = Math.max(240, els.imageScroller.clientWidth - 56);
     return Math.min(els.viewerImage.naturalWidth, available);
   }
 
@@ -386,11 +417,6 @@
     renderLibrary();
   });
 
-  els.categoryFilter.addEventListener("change", function () {
-    state.category = els.categoryFilter.value;
-    renderLibrary();
-  });
-
   els.backButton.addEventListener("click", function () {
     showLibrary(true);
   });
@@ -419,9 +445,7 @@
 
   els.fullscreenButton.addEventListener("click", toggleFullscreen);
 
-  els.viewerImage.addEventListener("load", function () {
-    renderZoom();
-  });
+  els.viewerImage.addEventListener("load", renderZoom);
 
   window.addEventListener("resize", function () {
     if (state.currentGuide && state.zoom === 1) renderZoom();
@@ -430,6 +454,12 @@
   window.addEventListener("hashchange", routeFromHash);
 
   document.addEventListener("keydown", function (event) {
+    if (!state.currentGuide && !isTypingTarget(event.target) && event.key === "/") {
+      event.preventDefault();
+      els.searchInput.focus();
+      return;
+    }
+
     if (isTypingTarget(event.target) || !state.currentGuide) return;
 
     if (event.key === "ArrowLeft") {
@@ -466,6 +496,7 @@
 
   els.imageScroller.addEventListener("touchend", function (event) {
     if (state.touchStartX == null || state.touchStartY == null || state.zoom > 1) return;
+
     const touch = event.changedTouches[0];
     const dx = touch.clientX - state.touchStartX;
     const dy = touch.clientY - state.touchStartY;
