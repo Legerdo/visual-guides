@@ -10,9 +10,9 @@ The GitHub Pages viewer provides:
 
 - topic/category cards and search
 - a viewport-sized reader that fits the entire image without page scrolling
-- previous/next buttons, arrow-key navigation, and mobile swipe
+- mouse-wheel page turns, previous/next buttons, arrow-key navigation, and mobile swipe
 - on-demand page thumbnails and guide details
-- separate screen-fit and width-fit modes, image zoom, drag-to-pan, and fullscreen
+- separate screen-fit and width-fit modes, Ctrl+wheel image zoom, drag-to-pan, and fullscreen
 - original-file access from the guide details
 - automatic catalog generation from each topic's `metadata.json`
 
@@ -24,9 +24,11 @@ when you want to read small text more closely; only the enlarged image area scro
 | Control | Action |
 |---|---|
 | Previous/next buttons | Turn pages at any zoom level |
-| `←` / `→`, horizontal swipe | Turn pages while the complete image fits |
+| Mouse wheel, vertical/horizontal swipe | Turn pages with a short slide/fade while the complete image fits |
+| `←` / `→` | Turn pages while the complete image fits |
+| `Ctrl` + mouse wheel | Zoom the image around the pointer without changing browser zoom |
 | `+` / `−` | Zoom in/out |
-| `0` / **화면 맞춤** | Show the complete image |
+| `R`, `0`, `Ctrl+0`, **화면 맞춤** | Reset zoom/pan and show the complete image |
 | `W` / **너비 맞춤** | Fit the image to the available width |
 | Double-click | Enlarge the image / return to screen fit |
 | Drag or arrow keys while enlarged | Pan within the image |
@@ -75,8 +77,8 @@ Do not hand-edit a deployed `catalog.json`; it is generated from topic metadata 
 ## Reader regression checks
 
 `scripts/test_viewer.cjs` uses Playwright to check the actual guide images at desktop,
-phone, and landscape sizes. It verifies viewport and image bounds, page navigation,
-zoom/pan, native touch swipes, dialogs, fullscreen, and history. It starts a temporary
+phone, and landscape sizes. It verifies viewport and image bounds, wheel/touch page
+navigation, Ctrl+wheel zoom, reset shortcuts, zoom/pan, dialogs, fullscreen, and history. It starts a temporary
 server on `127.0.0.1`, closes it after the run, and writes screenshots plus a JSON
 report to a temporary directory printed in the output.
 

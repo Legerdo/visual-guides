@@ -73,7 +73,11 @@
     ignoreDoubleClickUntil: 0,
     fullscreen: false,
     fullscreenExitAt: -Infinity,
-    layoutFrame: 0
+    layoutFrame: 0,
+    pageMotion: null,
+    wheelDelta: 0,
+    wheelResetTimer: 0,
+    lastWheelTurnAt: -Infinity
   };
 
   const categoryLabels = {
@@ -325,6 +329,75 @@
     return state.currentGuide.assets[state.pageIndex] || null;
   }
 
+  function reducedMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function motionOffset(motion, distance) {
+    const direction = motion && motion.direction < 0 ? -1 : 1;
+    const axis = motion && motion.axis === "y" ? "y" : "x";
+    return {
+      x: axis === "x" ? direction * distance : 0,
+      y: axis === "y" ? direction * distance : 0
+    };
+  }
+
+  function animatePageDeparture(motion) {
+    if (!motion || reducedMotion() || !state.imageReady || typeof els.viewerImage.animate !== "function") return;
+    const imageRect = els.viewerImage.getBoundingClientRect();
+    const stage = els.imageScroller.parentElement;
+    const stageRect = stage.getBoundingClientRect();
+    if (!imageRect.width || !imageRect.height) return;
+
+    const ghost = els.viewerImage.cloneNode(false);
+    ghost.removeAttribute("id");
+    ghost.removeAttribute("alt");
+    ghost.className = "page-transition-ghost";
+    ghost.style.left = (imageRect.left - stageRect.left) + "px";
+    ghost.style.top = (imageRect.top - stageRect.top) + "px";
+    ghost.style.width = imageRect.width + "px";
+    ghost.style.height = imageRect.height + "px";
+    stage.appendChild(ghost);
+
+    const offset = motionOffset(motion, 26);
+    const animation = ghost.animate([
+      { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" },
+      { opacity: 0, transform: "translate3d(" + (-offset.x) + "px, " + (-offset.y) + "px, 0) scale(.992)" }
+    ], {
+      duration: 210,
+      easing: "cubic-bezier(.4, 0, .2, 1)",
+      fill: "forwards"
+    });
+    animation.finished.catch(function () {}).then(function () { ghost.remove(); });
+  }
+
+  function animatePageArrival() {
+    const motion = state.pageMotion;
+    state.pageMotion = null;
+    if (!motion || reducedMotion() || typeof els.imageCanvas.animate !== "function") return;
+    const offset = motionOffset(motion, 30);
+    els.imageCanvas.animate([
+      { opacity: 0.16, transform: "translate3d(" + offset.x + "px, " + offset.y + "px, 0) scale(.992)" },
+      { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" }
+    ], {
+      duration: 240,
+      easing: "cubic-bezier(.2, .8, .2, 1)"
+    });
+  }
+
+  function animatePageBoundary(motion) {
+    if (!motion || reducedMotion() || typeof els.imageCanvas.animate !== "function") return;
+    const offset = motionOffset(motion, 10);
+    els.imageCanvas.animate([
+      { transform: "translate3d(0, 0, 0)" },
+      { transform: "translate3d(" + (-offset.x) + "px, " + (-offset.y) + "px, 0)" },
+      { transform: "translate3d(0, 0, 0)" }
+    ], {
+      duration: 180,
+      easing: "cubic-bezier(.2, .8, .2, 1)"
+    });
+  }
+
   function renderPage() {
     const asset = currentAsset();
     if (!asset) return;
@@ -364,7 +437,7 @@
     els.viewerImage.style.width = "1px";
     els.viewerImage.style.height = "1px";
     els.imageScroller.style.overflow = "hidden";
-    els.imageScroller.style.touchAction = "pan-y pinch-zoom";
+    els.imageScroller.style.touchAction = "pinch-zoom";
     els.imageScroller.dataset.viewMode = "fit";
     els.imageScroller.classList.remove("is-zoomed");
     els.imageScroller.setAttribute("aria-busy", "true");
@@ -385,6 +458,7 @@
       renderZoom();
       els.viewerImage.style.visibility = "visible";
       els.imageScroller.setAttribute("aria-busy", "false");
+      animatePageArrival();
       announce((state.pageIndex + 1) + " / " + state.currentGuide.assets.length +
         " 페이지, " + els.viewerImage.alt + ". 화면에 맞춰 표시합니다.");
     }
@@ -393,6 +467,7 @@
     els.viewerImage.onerror = function () {
       if (request !== state.imageRequest || !state.currentGuide) return;
       state.imageReady = false;
+      state.pageMotion = null;
       els.imageScroller.setAttribute("aria-busy", "false");
       if (els.imageError) els.imageError.classList.remove("hidden");
       updateZoomLabel();
@@ -402,10 +477,19 @@
     loaded();
   }
 
-  function setPage(index, updateHash) {
+  function setPage(index, updateHash, motion) {
     if (!state.currentGuide) return;
     const clamped = pageIndexInGuide(index, state.currentGuide);
-    if (clamped === state.pageIndex) return;
+    const pageMotion = motion || {
+      direction: clamped < state.pageIndex ? -1 : 1,
+      axis: "x"
+    };
+    if (clamped === state.pageIndex) {
+      animatePageBoundary(pageMotion);
+      return;
+    }
+    animatePageDeparture(pageMotion);
+    state.pageMotion = pageMotion;
     state.pageIndex = clamped;
     renderPage();
     if (updateHash) updateHashForCurrentPage();
@@ -429,6 +513,10 @@
     state.imageReady = false;
     state.imageRequest += 1;
     state.touch = null;
+    state.pageMotion = null;
+    state.wheelDelta = 0;
+    state.lastWheelTurnAt = -Infinity;
+    clearTimeout(state.wheelResetTimer);
     document.body.classList.remove("is-reading");
     els.guideView.classList.add("hidden");
     els.libraryView.classList.remove("hidden");
@@ -540,7 +628,7 @@
     }
     const overflowing = hasOverflow();
     stage.classList.toggle("is-zoomed", overflowing);
-    stage.style.touchAction = overflowing ? "pan-x pan-y pinch-zoom" : "pan-y pinch-zoom";
+    stage.style.touchAction = overflowing ? "pan-x pan-y pinch-zoom" : "pinch-zoom";
     stage.dataset.viewMode = state.mode;
     updateZoomLabel();
   }
@@ -564,6 +652,12 @@
     endDrag();
     renderZoom();
     els.imageScroller.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }
+
+  function resetViewer() {
+    if (!state.imageReady) return;
+    setFit("fit");
+    announce("이미지를 화면 맞춤으로 리셋했습니다.");
   }
 
   function setZoom(nextScale, point) {
@@ -665,14 +759,18 @@
   });
   els.backButton.addEventListener("click", function () { showLibrary(true); });
   [els.prevButton, els.stagePrevButton].forEach(function (button) {
-    button.addEventListener("click", function () { setPage(state.pageIndex - 1, true); });
+    button.addEventListener("click", function () {
+      setPage(state.pageIndex - 1, true, { direction: -1, axis: "x" });
+    });
   });
   [els.nextButton, els.stageNextButton].forEach(function (button) {
-    button.addEventListener("click", function () { setPage(state.pageIndex + 1, true); });
+    button.addEventListener("click", function () {
+      setPage(state.pageIndex + 1, true, { direction: 1, axis: "x" });
+    });
   });
   els.zoomOutButton.addEventListener("click", function () { setZoom(state.scale / 1.25); });
   els.zoomInButton.addEventListener("click", function () { setZoom(state.scale * 1.25); });
-  els.fitButton.addEventListener("click", function () { setFit("fit"); });
+  els.fitButton.addEventListener("click", resetViewer);
   els.widthButton.addEventListener("click", function () { setFit("width"); });
   els.fullscreenButton.addEventListener("click", toggleFullscreen);
   if (!els.viewerCard.requestFullscreen || document.fullscreenEnabled === false) {
@@ -728,6 +826,52 @@
   els.imageScroller.addEventListener("pointercancel", endDrag);
   els.imageScroller.addEventListener("lostpointercapture", endDrag);
 
+  function wheelDeltaInPixels(event) {
+    const multiplier = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 :
+      event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? els.imageScroller.clientHeight : 1;
+    return {
+      x: event.deltaX * multiplier,
+      y: event.deltaY * multiplier
+    };
+  }
+
+  els.viewerCard.addEventListener("wheel", function (event) {
+    if (!state.currentGuide) return;
+
+    if (event.ctrlKey) {
+      event.preventDefault();
+      if (!state.imageReady || anyDialogOpen()) return;
+      const delta = wheelDeltaInPixels(event).y;
+      if (!delta) return;
+      const point = els.imageScroller.contains(event.target) ? event : null;
+      const factor = Math.exp(-Math.max(-240, Math.min(240, delta)) * 0.0028);
+      setZoom(state.scale * factor, point);
+      announce("이미지 확대 " + Math.round(state.scale * 100) + "%.");
+      return;
+    }
+
+    if (!state.imageReady || anyDialogOpen() || hasOverflow() ||
+        (window.visualViewport && window.visualViewport.scale > 1.01)) return;
+
+    const delta = wheelDeltaInPixels(event);
+    const primary = Math.abs(delta.y) >= Math.abs(delta.x) ? delta.y : delta.x;
+    if (Math.abs(primary) < 1) return;
+    event.preventDefault();
+
+    const now = performance.now();
+    if (now - state.lastWheelTurnAt < 320) return;
+    if (state.wheelDelta && Math.sign(state.wheelDelta) !== Math.sign(primary)) state.wheelDelta = 0;
+    state.wheelDelta += primary;
+    clearTimeout(state.wheelResetTimer);
+    state.wheelResetTimer = setTimeout(function () { state.wheelDelta = 0; }, 160);
+    if (Math.abs(state.wheelDelta) < 72) return;
+
+    const direction = state.wheelDelta > 0 ? 1 : -1;
+    state.wheelDelta = 0;
+    state.lastWheelTurnAt = now;
+    setPage(state.pageIndex + direction, true, { direction: direction, axis: "y" });
+  }, { passive: false });
+
   function canSwipePage() {
     return state.imageReady && !hasOverflow() &&
       (!window.visualViewport || window.visualViewport.scale <= 1.01);
@@ -739,8 +883,16 @@
     state.touch = { id: touch.identifier, x: touch.clientX, y: touch.clientY, at: performance.now() };
   }, { passive: true });
   els.imageScroller.addEventListener("touchmove", function (event) {
-    if (event.touches.length !== 1) state.touch = null;
-  }, { passive: true });
+    if (event.touches.length !== 1) {
+      state.touch = null;
+      return;
+    }
+    if (!state.touch || !canSwipePage()) return;
+    const touch = event.touches[0];
+    if (Math.abs(touch.clientX - state.touch.x) + Math.abs(touch.clientY - state.touch.y) > 8) {
+      event.preventDefault();
+    }
+  }, { passive: false });
   els.imageScroller.addEventListener("touchend", function (event) {
     const start = state.touch;
     state.touch = null;
@@ -749,12 +901,24 @@
     if (!touch) return;
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
-    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
-    setPage(state.pageIndex + (dx < 0 ? 1 : -1), true);
+    const horizontal = Math.abs(dx) >= 48 && Math.abs(dx) >= Math.abs(dy) * 1.2;
+    const vertical = Math.abs(dy) >= 48 && Math.abs(dy) >= Math.abs(dx) * 1.1;
+    if (!horizontal && !vertical) return;
+    const direction = horizontal ? (dx < 0 ? 1 : -1) : (dy < 0 ? 1 : -1);
+    setPage(state.pageIndex + direction, true, {
+      direction: direction,
+      axis: horizontal ? "x" : "y"
+    });
   }, { passive: true });
   els.imageScroller.addEventListener("touchcancel", function () { state.touch = null; }, { passive: true });
 
   document.addEventListener("keydown", function (event) {
+    if (state.currentGuide && event.ctrlKey && !event.metaKey && !event.altKey && event.key === "0" &&
+        !isTypingTarget(event.target) && !anyDialogOpen()) {
+      event.preventDefault();
+      resetViewer();
+      return;
+    }
     if (event.defaultPrevented || event.isComposing || event.metaKey || event.ctrlKey || event.altKey ||
         isTypingTarget(event.target) || anyDialogOpen()) return;
     if (!state.currentGuide) {
@@ -769,7 +933,10 @@
     if (key === "ArrowLeft" || key === "ArrowRight") {
       if (!hasOverflow() && (!window.visualViewport || window.visualViewport.scale <= 1.01)) {
         event.preventDefault();
-        setPage(state.pageIndex + (key === "ArrowRight" ? 1 : -1), true);
+        setPage(state.pageIndex + (key === "ArrowRight" ? 1 : -1), true, {
+          direction: key === "ArrowRight" ? 1 : -1,
+          axis: "x"
+        });
       } else if (hasOverflow()) {
         event.preventDefault();
         els.imageScroller.scrollLeft += (key === "ArrowRight" ? 1 : -1) * Math.max(80, els.imageScroller.clientWidth / 4);
@@ -779,7 +946,10 @@
       els.imageScroller.scrollTop += (key === "ArrowDown" ? 1 : -1) * Math.max(80, els.imageScroller.clientHeight / 4);
     } else if (key === "PageUp" || key === "PageDown") {
       event.preventDefault();
-      setPage(state.pageIndex + (key === "PageDown" ? 1 : -1), true);
+      setPage(state.pageIndex + (key === "PageDown" ? 1 : -1), true, {
+        direction: key === "PageDown" ? 1 : -1,
+        axis: "y"
+      });
     } else if (key === "Home" || key === "End") {
       event.preventDefault();
       setPage(key === "Home" ? 0 : state.currentGuide.assets.length - 1, true);
@@ -789,9 +959,9 @@
     } else if (key === "-") {
       event.preventDefault();
       setZoom(state.scale / 1.25);
-    } else if (key === "0") {
+    } else if (key === "0" || key.toLowerCase() === "r") {
       event.preventDefault();
-      setFit("fit");
+      resetViewer();
     } else if (key.toLowerCase() === "w") {
       event.preventDefault();
       setFit("width");

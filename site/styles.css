@@ -613,6 +613,7 @@ body.is-reading > main {
   min-height: 100%;
   display: grid;
   place-items: center;
+  will-change: transform, opacity;
 }
 
 .image-stage img {
@@ -632,8 +633,20 @@ body.is-reading > main {
   cursor: grabbing;
 }
 
+.page-transition-ghost {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+  box-shadow: var(--shadow-local);
+  will-change: transform, opacity;
+}
+
 .page-turn {
   position: absolute;
+  z-index: 2;
   top: 50%;
   width: 48px;
   height: 56px;

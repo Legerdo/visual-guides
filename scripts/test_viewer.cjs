@@ -70,6 +70,11 @@ async function imageLoaded(page) {
     const image = document.getElementById('viewer-image');
     return image && image.complete && image.naturalWidth > 0 && image.getBoundingClientRect().width > 0 && getComputedStyle(image).visibility !== 'hidden' && document.getElementById('image-scroller').getAttribute('aria-busy') !== 'true';
   });
+  await page.waitForFunction(() => {
+    const canvas = document.getElementById('image-canvas');
+    return !document.querySelector('.page-transition-ghost') &&
+      (!canvas.getAnimations || canvas.getAnimations().every(animation => animation.playState === 'finished'));
+  });
   await settle(page);
 }
 async function geometry(page) {
@@ -158,10 +163,61 @@ async function run(name, fn) {
         }
         await page.goto(urlFor(multi)); await assertFit(page);
         await page.screenshot({ path: path.join(out, `reader-${width}x${height}.png`) });
-        await page.mouse.wheel(0, 700); await settle(page); await assertFit(page);
       } finally { await context.close(); }
     });
   }
+  await run('mouse wheel page turns animate, Ctrl+wheel zooms image, reset shortcuts', async () => {
+    const { context, page } = await fresh();
+    try {
+      await page.goto(urlFor(multi)); const fit = await assertFit(page);
+      const stage = fit.stage;
+      await page.mouse.move(stage.x + stage.width * .5, stage.y + stage.height * .5);
+      await page.mouse.wheel(0, 120);
+      await page.waitForFunction(() => document.querySelector('.page-transition-ghost') || document.getElementById('image-canvas').getAnimations().length > 0);
+      await pageNumber(page, 2, multi.assets.length); await assertFit(page);
+      await page.waitForTimeout(340);
+      await page.mouse.wheel(0, -120); await pageNumber(page, 1, multi.assets.length); await assertFit(page);
+
+      const browserBefore = await page.evaluate(() => ({
+        dpr: devicePixelRatio,
+        width: innerWidth,
+        height: innerHeight,
+        visualScale: visualViewport ? visualViewport.scale : 1
+      }));
+      await page.keyboard.down('Control');
+      await page.mouse.wheel(0, -180);
+      await page.keyboard.up('Control');
+      await settle(page);
+      const zoomed = await geometry(page);
+      assert.equal(zoomed.indicator, '1 / ' + multi.assets.length, 'Ctrl+wheel must not turn the page');
+      assert.equal(zoomed.fitPressed, 'false', 'Ctrl+wheel must leave screen-fit mode');
+      assert.ok(zoomed.image.width > fit.image.width + 20, 'Ctrl+wheel should enlarge the image');
+      const browserAfter = await page.evaluate(() => ({
+        dpr: devicePixelRatio,
+        width: innerWidth,
+        height: innerHeight,
+        visualScale: visualViewport ? visualViewport.scale : 1
+      }));
+      assert.deepEqual(browserAfter, browserBefore, 'Ctrl+wheel must not change browser zoom');
+
+      const scrollBefore = zoomed.stage.scrollTop;
+      await page.mouse.wheel(0, 160); await settle(page);
+      const panned = await geometry(page);
+      assert.equal(panned.indicator, zoomed.indicator, 'normal wheel must pan instead of turning an enlarged image');
+      assert.ok(panned.stage.scrollTop >= scrollBefore, 'normal wheel should remain available for enlarged-image panning');
+
+      await page.keyboard.press('r'); await assertFit(page);
+      await page.keyboard.down('Control'); await page.mouse.wheel(0, -180); await page.keyboard.up('Control'); await settle(page);
+      assert.equal((await geometry(page)).fitPressed, 'false');
+      await page.keyboard.press('Control+0'); await assertFit(page);
+      assert.deepEqual(await page.evaluate(() => ({
+        dpr: devicePixelRatio,
+        width: innerWidth,
+        height: innerHeight,
+        visualScale: visualViewport ? visualViewport.scale : 1
+      })), browserBefore, 'Ctrl+0 must reset the image without changing browser zoom');
+    } finally { await context.close(); }
+  });
   await run('buttons, keyboard, boundaries, cached image resets', async () => {
     const { context, page } = await fresh();
     try {
@@ -249,26 +305,28 @@ async function run(name, fn) {
       await page.keyboard.press('0'); await assertFit(page);
     } finally { await context.close(); }
   });
-  await run('native touch swipes unscrolled images and pans enlarged images', async () => {
+  await run('native touch vertical/horizontal scroll gestures turn pages and enlarged images pan', async () => {
     const { context, page } = await fresh({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     try {
       await page.goto(urlFor(multi)); await assertFit(page);
       const cdp = await context.newCDPSession(page);
-      const swipe = async direction => {
+      const swipe = async (dx, dy) => {
         const stage = (await geometry(page)).stage;
-        const x = stage.x + stage.width * (direction < 0 ? .75 : .25);
+        const x = stage.x + stage.width * .5;
         const y = stage.y + stage.height * .5;
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
-        for (let step = 1; step <= 6; step++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + direction * 24 * step, y }] });
+        for (let step = 1; step <= 6; step++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x + dx * step / 6, y: y + dy * step / 6 }] });
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
         await settle(page);
       };
-      await swipe(-1); await pageNumber(page, 2, multi.assets.length); await assertFit(page);
-      await swipe(1); await pageNumber(page, 1, multi.assets.length); await assertFit(page);
+      await swipe(-144, 0); await pageNumber(page, 2, multi.assets.length); await assertFit(page);
+      await swipe(144, 0); await pageNumber(page, 1, multi.assets.length); await assertFit(page);
+      await swipe(0, -144); await pageNumber(page, 2, multi.assets.length); await assertFit(page);
+      await swipe(0, 144); await pageNumber(page, 1, multi.assets.length); await assertFit(page);
       await page.locator('#width-button').click(); await settle(page);
       const widthGeometry = await geometry(page);
       const widthCanSwipe = widthGeometry.stage.scrollWidth <= widthGeometry.stage.clientWidth + 1 && widthGeometry.stage.scrollHeight <= widthGeometry.stage.clientHeight + 1;
-      await swipe(-1); const expectedPage = widthCanSwipe ? 2 : 1;
+      await swipe(0, -144); const expectedPage = widthCanSwipe ? 2 : 1;
       await pageNumber(page, expectedPage, multi.assets.length);
       for (let count = 0; count < 6; count++) {
         const g = await geometry(page);
@@ -277,7 +335,7 @@ async function run(name, fn) {
       }
       const enlarged = await geometry(page);
       assert.ok(enlarged.stage.scrollWidth > enlarged.stage.clientWidth + 1 || enlarged.stage.scrollHeight > enlarged.stage.clientHeight + 1, 'test image needs actual overflow for panning');
-      await swipe(-1); await pageNumber(page, expectedPage, multi.assets.length);
+      await swipe(0, -144); await pageNumber(page, expectedPage, multi.assets.length);
       await cdp.detach();
     } finally { await context.close(); }
   });
