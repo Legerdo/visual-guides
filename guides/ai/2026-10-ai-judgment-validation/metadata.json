@@ -1,0 +1,60 @@
+{
+  "slug": "2026-10-ai-judgment-validation",
+  "title": "AI는 권위가 아니라 도구다",
+  "category": "ai",
+  "created": "2026-10-07",
+  "language": "ko",
+  "status": "published-ready",
+  "summary": "‘Claude가 그러는데…’ 식의 AI 권위화 문제를 출발점으로, 검증 책임과 과장된 일반화를 분리하고 AI를 반례 탐색·검증 보조 도구로 쓰는 3장짜리 가이드.",
+  "tags": [
+    "ai",
+    "critical-thinking",
+    "validation",
+    "sycophancy",
+    "automation-bias",
+    "software-engineering"
+  ],
+  "pages": [
+    {
+      "path": "guides/ai/2026-10-ai-judgment-validation/images/01-ai-is-a-tool-not-authority.png",
+      "title": "AI, 어떻게 써야 하냐",
+      "description": "LLM 출력 자체는 근거가 아니며, 전제·편향과 automation bias 때문에 검증 없는 판단 외주화가 위험하다는 핵심을 설명한다."
+    },
+    {
+      "path": "guides/ai/2026-10-ai-judgment-validation/images/02-what-is-valid-and-overstated.png",
+      "title": "어디까지 맞고, 어디서 과장됐나",
+      "description": "AI 답변 검증의 필요성과, LLM 사용·전문성·과잉설계의 인과를 과도하게 일반화한 주장들을 분리해 정리한다."
+    },
+    {
+      "path": "guides/ai/2026-10-ai-judgment-validation/images/03-ai-judgment-workflow.png",
+      "title": "그래서 어떻게 쓰면 되냐",
+      "description": "문제 정의, 후보·반례 탐색, 원자료·문서·테스트 검증, 사람의 최종 판단으로 이어지는 실전 AI 사용 절차를 제시한다."
+    }
+  ],
+  "assets": [
+    {
+      "path": "guides/ai/2026-10-ai-judgment-validation/images/01-ai-is-a-tool-not-authority.png",
+      "sha256": "b02e0c86d0bb50d1d74bf8eca026ff3dfb4fbd9893124c2bb02b0f794917e644",
+      "bytes": 1231559,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-10-ai-judgment-validation/images/02-what-is-valid-and-overstated.png",
+      "sha256": "c24ae3396dca89da94bb8aae374e60025b94b82ed84be5a24f3c814fb7eac623",
+      "bytes": 1449933,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-10-ai-judgment-validation/images/03-ai-judgment-workflow.png",
+      "sha256": "c8939a084f802d7685afbe037317f9f3847854d11e28912770230d0ea40a82ec",
+      "bytes": 1460235,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    }
+  ]
+}
