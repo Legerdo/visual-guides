@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
   <meta name="description" content="주제별 이미지 가이드를 탐색하고 읽는 Visual Guides">
@@ -68,86 +68,93 @@
       </div>
     </section>
 
-    <section id="guide-view" class="guide-view hidden" aria-live="polite">
-      <div class="reader-shell">
-        <button id="back-button" class="back-link" type="button">
-          <span aria-hidden="true">←</span>
-          가이드 목록
-        </button>
-
-        <header class="guide-header">
-          <div class="guide-header__main">
-            <div class="guide-header__meta">
-              <span id="guide-category" class="badge"></span>
-              <time id="guide-date"></time>
-              <span aria-hidden="true">·</span>
-              <span id="guide-page-count"></span>
-            </div>
+    <section id="guide-view" class="guide-view hidden" aria-label="이미지 가이드 읽기">
+      <section id="viewer-card" class="viewer" aria-labelledby="guide-title">
+        <header class="reader-header">
+          <button id="back-button" class="back-link" type="button" aria-label="가이드 목록으로 돌아가기" title="가이드 목록 (Esc)">
+            <span aria-hidden="true">←</span><span class="back-link__label">목록</span>
+          </button>
+          <div class="reader-title">
+            <span id="guide-category" class="badge"></span>
             <h1 id="guide-title"></h1>
-            <p id="guide-summary"></p>
           </div>
-          <div class="guide-header__actions">
-            <a id="sources-link" class="action-button action-button--weak hidden" target="_blank" rel="noreferrer">
-              근거 자료
-            </a>
-            <a id="source-link" class="action-button action-button--outline" target="_blank" rel="noreferrer">
-              GitHub에서 보기
-            </a>
+          <div class="reader-header__actions">
+            <button id="pages-button" class="toolbar-button" type="button" aria-haspopup="dialog" aria-controls="page-dialog">페이지</button>
+            <button id="info-button" class="toolbar-button" type="button" aria-haspopup="dialog" aria-controls="details-dialog">설명</button>
           </div>
         </header>
-      </div>
 
-      <div class="reader-shell reader-shell--wide">
-        <div class="reader-layout">
-          <aside class="page-nav" aria-label="페이지 목록">
-            <div class="page-nav__header">
-              <span>페이지</span>
-              <span id="page-nav-count"></span>
+        <div class="reader-stage">
+          <div id="image-scroller" class="image-stage" tabindex="0" role="region" aria-label="가이드 이미지" aria-describedby="reader-help">
+            <div id="image-canvas" class="image-canvas">
+              <img id="viewer-image" alt="" draggable="false">
             </div>
-            <div id="thumbnail-list" class="thumbnail-list"></div>
-          </aside>
-
-          <section id="viewer-card" class="viewer">
-            <div class="viewer-toolbar">
-              <div class="viewer-toolbar__group viewer-toolbar__group--nav">
-                <button id="prev-button" class="icon-button" type="button" aria-label="이전 페이지">
-                  <span aria-hidden="true">←</span>
-                </button>
-                <strong id="page-indicator" class="page-indicator">1 / 1</strong>
-                <button id="next-button" class="icon-button" type="button" aria-label="다음 페이지">
-                  <span aria-hidden="true">→</span>
-                </button>
-              </div>
-
-              <div class="viewer-toolbar__group">
-                <button id="zoom-out-button" class="icon-button" type="button" aria-label="축소">−</button>
-                <button id="fit-button" class="toolbar-button" type="button">맞춤</button>
-                <button id="zoom-in-button" class="icon-button" type="button" aria-label="확대">＋</button>
-                <span class="toolbar-divider" aria-hidden="true"></span>
-                <button id="fullscreen-button" class="toolbar-button" type="button">전체화면</button>
-                <a id="original-link" class="toolbar-button" target="_blank" rel="noreferrer">원본 ↗</a>
-              </div>
-            </div>
-
-            <div id="image-scroller" class="image-stage" tabindex="0">
-              <img id="viewer-image" alt="">
-            </div>
-
-            <div class="page-info">
-              <div class="page-info__main">
-                <span id="page-kicker" class="page-kicker"></span>
-                <h2 id="page-title"></h2>
-                <p id="page-description"></p>
-              </div>
-              <span id="zoom-label" class="zoom-label">맞춤</span>
-            </div>
-          </section>
+          </div>
+          <button id="stage-prev-button" class="page-turn page-turn--prev" type="button" aria-label="이전 페이지" title="이전 페이지 (←)"><span aria-hidden="true">‹</span></button>
+          <button id="stage-next-button" class="page-turn page-turn--next" type="button" aria-label="다음 페이지" title="다음 페이지 (→)"><span aria-hidden="true">›</span></button>
+          <div id="image-error" class="image-error hidden" role="alert">
+            <strong>이미지를 불러오지 못했어요.</strong>
+            <button id="retry-image-button" class="action-button action-button--outline" type="button">다시 불러오기</button>
+          </div>
         </div>
 
-        <p class="shortcut-hint">
-          <kbd>←</kbd><kbd>→</kbd> 페이지 · <kbd>+</kbd><kbd>−</kbd> 확대 · <kbd>0</kbd> 맞춤 · <kbd>F</kbd> 전체화면
-        </p>
-      </div>
+        <footer class="viewer-toolbar" aria-label="읽기 도구">
+          <div class="viewer-toolbar__group viewer-toolbar__group--nav">
+            <button id="prev-button" class="icon-button" type="button" aria-label="이전 페이지" title="이전 페이지 (←)"><span aria-hidden="true">←</span></button>
+            <strong id="page-indicator" class="page-indicator">1 / 1</strong>
+            <button id="next-button" class="icon-button" type="button" aria-label="다음 페이지" title="다음 페이지 (→)"><span aria-hidden="true">→</span></button>
+          </div>
+          <div class="reader-caption">
+            <h2 id="page-title"></h2>
+            <span class="reader-caption__hint">방향키로 넘기기 · 더블클릭으로 확대</span>
+          </div>
+          <div class="viewer-toolbar__group viewer-toolbar__group--tools">
+            <button id="zoom-out-button" class="icon-button" type="button" aria-label="축소" title="축소 (−)">−</button>
+            <button id="fit-button" class="toolbar-button" type="button" aria-pressed="true" title="이미지 전체를 한 화면에 (0)">화면 맞춤</button>
+            <button id="zoom-in-button" class="icon-button" type="button" aria-label="확대" title="확대 (+)">＋</button>
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <button id="width-button" class="toolbar-button" type="button" aria-pressed="false" title="가로폭에 맞춰 크게 읽기 (W)">너비 맞춤</button>
+            <button id="fullscreen-button" class="toolbar-button" type="button" title="전체화면 (F)">전체화면</button>
+          </div>
+        </footer>
+
+        <dialog id="page-dialog" class="reader-dialog reader-dialog--pages" aria-labelledby="page-dialog-title">
+          <header class="reader-dialog__header">
+            <h2 id="page-dialog-title">페이지 <span id="page-nav-count" class="dialog-count"></span></h2>
+            <button id="close-pages-button" class="icon-button" type="button" aria-label="페이지 목록 닫기" autofocus>×</button>
+          </header>
+          <div id="thumbnail-list" class="thumbnail-list"></div>
+        </dialog>
+
+        <dialog id="details-dialog" class="reader-dialog reader-dialog--details" aria-labelledby="details-dialog-title">
+          <header class="reader-dialog__header">
+            <h2 id="details-dialog-title">가이드 설명</h2>
+            <button id="close-details-button" class="icon-button" type="button" aria-label="설명 닫기" autofocus>×</button>
+          </header>
+          <div class="reader-details">
+            <div class="guide-header__meta">
+              <time id="guide-date"></time><span aria-hidden="true">·</span><span id="guide-page-count"></span>
+            </div>
+            <p id="guide-summary"></p>
+            <div class="page-info">
+              <span id="page-kicker" class="page-kicker"></span>
+              <p id="page-description"></p>
+            </div>
+            <div class="reader-details__links">
+              <a id="original-link" class="action-button action-button--outline" target="_blank" rel="noreferrer">이미지 원본 ↗</a>
+              <a id="sources-link" class="action-button action-button--weak hidden" target="_blank" rel="noreferrer">근거 자료 ↗</a>
+              <a id="source-link" class="action-button action-button--weak" target="_blank" rel="noreferrer">GitHub ↗</a>
+            </div>
+            <div class="reader-help">
+              <h3>편하게 읽는 방법</h3>
+              <p id="reader-help">화살표 버튼이나 ← → 키로 페이지를 넘기세요. 휴대폰에서는 좌우로 쓸어 넘길 수 있어요. 더블클릭하면 확대되고, 확대된 이미지는 드래그해서 볼 수 있어요.</p>
+              <p class="shortcut-hint"><kbd>+</kbd><kbd>−</kbd> 확대·축소 <kbd>0</kbd> 화면 맞춤 <kbd>W</kbd> 너비 맞춤 <kbd>F</kbd> 전체화면</p>
+              <span id="zoom-label" class="zoom-label">화면 맞춤</span>
+            </div>
+          </div>
+        </dialog>
+        <p id="reader-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+      </section>
     </section>
 
     <section id="load-error" class="error-state hidden" role="alert">
