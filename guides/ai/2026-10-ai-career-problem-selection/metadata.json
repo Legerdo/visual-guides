@@ -1,0 +1,60 @@
+{
+  "slug": "2026-10-ai-career-problem-selection",
+  "title": "AI 시대 커리어 조언",
+  "category": "ai",
+  "created": "2026-10-07",
+  "language": "ko",
+  "status": "published-ready",
+  "summary": "잘 정의된 문제 해결의 자동화가 빨라지는 AI 시대에 문제 발견·선택, 성공 기준 정의, 자원 배분, 검증, 마지막 완성도가 왜 더 중요해지는지와 그 한계를 3장으로 정리한 커리어 가이드.",
+  "tags": [
+    "ai",
+    "career",
+    "problem-selection",
+    "agents",
+    "evaluation",
+    "productivity"
+  ],
+  "pages": [
+    {
+      "path": "guides/ai/2026-10-ai-career-problem-selection/images/01-ai-career-problem-selection.png",
+      "title": "문제를 푸는 능력보다, 문제를 찾고 선택하는 능력",
+      "description": "잘 정의되고 채점 가능한 업무가 자동화될수록 사람에게 더 중요해지는 문제 발견, 성공 기준·제약 정의, 결과 검증의 역할을 정리한다."
+    },
+    {
+      "path": "guides/ai/2026-10-ai-career-problem-selection/images/02-ai-career-investments.png",
+      "title": "무엇에 투자해야 하나",
+      "description": "시간·관계·평판 같은 희소 자산과 회사·프로젝트 선택 기준, 좋은 기회를 실제 성과로 바꾸는 과정을 요약한다."
+    },
+    {
+      "path": "guides/ai/2026-10-ai-career-problem-selection/images/03-ai-career-practical-application.png",
+      "title": "실전에서 어떻게 적용할까",
+      "description": "문제 구조화, 성공 기준 정의, AI 위임과 검증, 포트폴리오 신호를 실전 행동으로 연결하고 경험 기반 조언이라는 한계도 함께 명시한다."
+    }
+  ],
+  "assets": [
+    {
+      "path": "guides/ai/2026-10-ai-career-problem-selection/images/01-ai-career-problem-selection.png",
+      "sha256": "c77f8127ff377bfd6762f5cb2989d8de701cf443e59efb66e04073b5dfc2615e",
+      "bytes": 1214595,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-10-ai-career-problem-selection/images/02-ai-career-investments.png",
+      "sha256": "06da2447bc1d16b55e8c183fbc0c2eac343243d5906908073a574c071a4334f8",
+      "bytes": 1425011,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/ai/2026-10-ai-career-problem-selection/images/03-ai-career-practical-application.png",
+      "sha256": "cc37dbe9556d29a93bef5dfd29fb10bcb00caee518022a0b4e567e09a78bed79",
+      "bytes": 1423098,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    }
+  ]
+}
