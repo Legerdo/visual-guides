@@ -62,6 +62,7 @@ The viewer source lives in `site/`. `scripts/build_site.py` validates guide meta
 
 | Date | Category | Topic | Assets |
 |---|---|---|---:|
+| 2026-10-07 | Development | [웹 개발 교육의 죽음?](guides/development/2026-10-web-dev-education-ai/) | 4 |
 | 2026-09-28 | AI | [설명할 수 없는 실패의 일상화](guides/ai/2026-09-inexplicable-ai-failures/) | 1 |
 | 2026-09-28 | AI | [Why AI evaluations diverge](guides/ai/2026-09-ai-evaluation-gap/) | 4 |
 

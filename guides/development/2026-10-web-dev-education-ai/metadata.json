@@ -1,0 +1,72 @@
+{
+  "slug": "2026-10-web-dev-education-ai",
+  "title": "웹 개발 교육의 죽음?",
+  "category": "development",
+  "created": "2026-10-07",
+  "language": "ko",
+  "status": "published-ready",
+  "summary": "생성형 AI 시대에 웹 개발 교육 자체의 쇠퇴와 독립 교육자의 기존 콘텐츠 유통·수익 모델 붕괴를 구분하고, 실제 사례·학습 효과·앞으로의 교육 기준을 정리한 4장짜리 가이드.",
+  "tags": [
+    "web-development",
+    "developer-education",
+    "generative-ai",
+    "creator-economy",
+    "learning"
+  ],
+  "pages": [
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/01-web-dev-education-death.png",
+      "title": "웹 개발 교육의 죽음?",
+      "description": "웹 개발 학습 자체보다 독립 교육자의 기존 검색 유입·책·강좌 판매 모델이 더 직접적인 압박을 받고 있다는 전체 프레임을 설명한다."
+    },
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/02-independent-educator-impact.png",
+      "title": "실제 타격 사례",
+      "description": "Axel Rauschmayer, Josh W. Comeau, Web Dev Simplified, Salma Alam-Naylor의 공개 사례를 통해 수익·트래픽·활동 지속성의 변화를 정리한다."
+    },
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/03-ai-learning-effects.png",
+      "title": "AI로 배우면 더 잘 배우나?",
+      "description": "AI 학습 지원의 즉시성·개인화 장점과 학습 마찰 감소, 성과와 실제 학습의 분리 가능성을 함께 비교한다."
+    },
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/04-future-of-web-dev-education.png",
+      "title": "앞으로 남는 과제",
+      "description": "검증 능력, 시스템 설계와 실전 경험, 상호작용형 교육, 인간 멘토링과 공동체가 앞으로 더 중요해질 이유를 정리한다."
+    }
+  ],
+  "assets": [
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/01-web-dev-education-death.png",
+      "sha256": "8b114063c085a5eb11e3803134e25f259f7e39f4994e3b9ba99705344c6c7963",
+      "bytes": 1307617,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/02-independent-educator-impact.png",
+      "sha256": "f3ddf6a6d52d173ddd479cfffbb668880342e7ea0885db071ff2d0031456462c",
+      "bytes": 1476606,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/03-ai-learning-effects.png",
+      "sha256": "1ebca1fe29a0f5c282b45ca89b523b61497e0bd8afcd642a3a32be7ccd22fda4",
+      "bytes": 1488950,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    },
+    {
+      "path": "guides/development/2026-10-web-dev-education-ai/images/04-future-of-web-dev-education.png",
+      "sha256": "58349a77903513a25458d566be7f8a129e195d985f10042ad2644299998a4c6d",
+      "bytes": 1572150,
+      "width": 1122,
+      "height": 1402,
+      "mime": "image/png"
+    }
+  ]
+}
